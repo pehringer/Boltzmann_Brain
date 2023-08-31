@@ -1,12 +1,6 @@
 from random import randrange, random
 
 
-# Mutation-only genetic algorithms are often considered the simplest type of
-# genetic algorithm. In these algorithms, new solutions are generated primarily
-# through mutation operations without the introduction of genetic material
-# from parents.
-
-
 def initialization(size: int) -> list[int]:
 	'''
 	Create an initial population of potential solutions (individuals) using
