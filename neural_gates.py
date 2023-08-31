@@ -85,22 +85,36 @@ def selection(population: list[list[float]]) -> list[list[float]]:
 	return population[:len(population) // 2]
 
 
-def mutation(selected: list[list[float]], rate: float) -> list[list[float]]:
+def crossover(parents: list[list[float]]) -> list[list[float]]:
+	'''
+	Create new individuals (offspring) by combining genetic information
+	from selected parents. Crossover points are chosen in the genetic
+	material to exchange information.
+	'''
+	# Create equal number of offspring from parents.
+	offspring = []
+	for p in range(len(parents)):
+		# Randomly select parents.
+		male = parents[randrange(0, len(parents))]
+		female = parents[randrange(0, len(parents))]
+		# Randomly crossover.
+		point = randrange(1,8)
+		genetics = male[:point] + female[point:]
+		offspring.append(genetics)
+	return offspring
+
+
+def mutation(offspring: list[list[float]], rate: float) -> None:
 	'''
 	Introduce small random changes in the genetic material of the selected
 	individuals to generate new solutions (offspring).
 	'''
-	offspring = []
-	for i in selected:
+	for i in range(len(offspring)):
 		# Create new mutated genetics for each offspring.
-		genetics = []
-		for val in i:
+		for v in range(9):
 			# Randomly mutate offspring vals at the given rate.
 			if random() <= rate:
-				val += uniform(-0.2, 0.2)
-			genetics.append(val)
-		offspring.append(genetics)
-	return offspring
+				offspring[i][v] += uniform(-0.2, 0.2)
 
 
 def replacement(population: list[int], offspring: list[int]) -> None:
@@ -133,10 +147,12 @@ def mutation_only_genetic_algorithm(size: int, generations: int, inputs: list[li
 		# Step 3:
 		selected = selection(population)
 		# Step 4:
-		offspring = mutation(selected, rate)
-		# Step 5:
-		replacement(population, offspring)
+		offspring = crossover(selected)
+		# step 5:
+		mutation(selected, rate)
 		# Step 6:
+		replacement(population, offspring)
+		# Step 7:
 		err, term = termination(population, inputs, outputs, error)
 		print("Generation %d, Error: %f" % (gen, err))
 		gen += 1
@@ -151,7 +167,7 @@ OR = [0.0, 1.0, 1.0, 1.0]
 NOR = [1.0, 0.0, 0.0, 0.0]
 AND = [0.0, 0.0, 0.0, 1.0]
 NAND = [1.0, 1.0, 1.0, 0.0]
-mutation_only_genetic_algorithm(64, 1024, inputs, OR, 0.8, 0.35)
+#mutation_only_genetic_algorithm(512, 1024, inputs, OR, 0.1, 0.1)
 
 XOR = [0.0, 1.0, 1.0, 0.0]
-mutation_only_genetic_algorithm(512, 1024, inputs, XOR, 0.8, 0.35)
+mutation_only_genetic_algorithm(512, 1024, inputs, XOR, 0.1, 0.1)
