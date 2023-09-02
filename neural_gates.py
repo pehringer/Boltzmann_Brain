@@ -39,7 +39,7 @@ def initialization(size: int) -> list[list[float]]:
 	for i in range(size):
 		individual = []
 		for f in range(9):
-			individual.append(random())
+			individual.append(uniform(-1, 1))
 		population.append(individual)
 	return population
 
@@ -114,7 +114,7 @@ def mutation(offspring: list[list[float]], rate: float) -> None:
 		for v in range(9):
 			# Randomly mutate offspring vals at the given rate.
 			if random() <= rate:
-				offspring[i][v] += uniform(-0.2, 0.2)
+				offspring[i][v] += uniform(-1, 1)
 
 
 def replacement(population: list[int], offspring: list[int]) -> None:
@@ -167,7 +167,7 @@ OR = [0.0, 1.0, 1.0, 1.0]
 NOR = [1.0, 0.0, 0.0, 0.0]
 AND = [0.0, 0.0, 0.0, 1.0]
 NAND = [1.0, 1.0, 1.0, 0.0]
-#mutation_only_genetic_algorithm(512, 1024, inputs, OR, 0.1, 0.1)
+#mutation_only_genetic_algorithm(512, 1024, inputs, OR, 0.05, 0.2)
 
 XOR = [0.0, 1.0, 1.0, 0.0]
-mutation_only_genetic_algorithm(512, 1024, inputs, XOR, 0.1, 0.1)
+mutation_only_genetic_algorithm(512, 1024, inputs, XOR, 0.05, 0.2)
