@@ -136,7 +136,7 @@ def termination(population: list[list[float]], inputs: list[list[float]], output
 	return fitness, fitness <= error
 
 
-def mutation_only_genetic_algorithm(size: int, generations: int, inputs: list[list[float]], outputs: list[float], rate: float, error: float):
+def genetic_algorithm(size: int, generations: int, inputs: list[list[float]], outputs: list[float], rate: float, error: float):
 	gen = 0
 	term = False
 	# Step 1:
@@ -167,7 +167,7 @@ OR = [0.0, 1.0, 1.0, 1.0]
 NOR = [1.0, 0.0, 0.0, 0.0]
 AND = [0.0, 0.0, 0.0, 1.0]
 NAND = [1.0, 1.0, 1.0, 0.0]
-#mutation_only_genetic_algorithm(512, 1024, inputs, OR, 0.05, 0.2)
+#genetic_algorithm(512, 1024, inputs, OR, 0.05, 0.2)
 
 XOR = [0.0, 1.0, 1.0, 0.0]
-mutation_only_genetic_algorithm(512, 1024, inputs, XOR, 0.05, 0.2)
+genetic_algorithm(512, 1024, inputs, XOR, 0.05, 0.2)
