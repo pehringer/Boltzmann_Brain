@@ -16,13 +16,25 @@ void MutateDuplication(struct Individual *i, int min, int max) {
     }
 }
 
+void MutateInsertion(struct Individual *i, int min, int max) {
+    int genes = RandomInt(min, max);
+    float *geneX = i->genome + RandomInt(0, i->genes - genes);
+    float *geneY = i->genome + RandomInt(0, i->genes - genes);
+    while(genes > 0) {
+        *geneY = *geneX;
+        geneX++;
+        geneY++;
+        genes--;
+    }
+}
+
 void MutateTranslocation(struct Individual *i, int min, int max) {
     int genes = RandomInt(min, max);
     float *geneX = i->genome + RandomInt(0, i->genes - genes);
     float *geneY = i->genome + RandomInt(0, i->genes - genes);
     while(genes > 0) {
 	float swap = *geneY;
-	*geneY = geneX;
+	*geneY = *geneX;
 	geneX = swap;
         geneX++;
         geneY++;
@@ -34,10 +46,10 @@ void MutateInversion(struct Individual *i, int min, int max) {
     int genes = RandomInt(min, max);
     float *geneX = i->genome + RandomInt(0, i->genes - genes);
     float *geneY = geneX + genes - 1;
-    genes \= 2;
+    genes /= 2;
     while(genes > 0) {
 	float swap = *geneY;
-	*geneY = geneX;
+	*geneY = *geneX;
 	geneX = swap;
         geneX++;
         geneY--;
