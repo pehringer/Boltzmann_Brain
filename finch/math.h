@@ -7,8 +7,10 @@ int AbsoluteInt(int value);
 
 float AbsoluteFloat(float value);
 
-int RandomInt(int min, int max);
+int RandomRangeInt(int min, int max);
 
-float RandomFloat(float min, float max);
+float RandomRangeFloat(float min, float max);
+
+float RandomFloat(void);
 
 #endif

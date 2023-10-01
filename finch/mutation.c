@@ -1,58 +1,115 @@
 #include "mutation.h"
 
-void MutatePoint(struct Individual *i, float min, float max) {
-    *(i->genome + RandomInt(0, i->genes - 1)) += RandomFloat(min, max);
+void PointChange(struct Individual *i, float minAmount, float maxAmount) {
+    int geneX = RandomRangeInt(0, i->genes - 1);
+    // Change by adjusting current value.
+    i->genome[geneX] += RandomRangeFloat(minAmount, maxAmount);
 }
 
-void MutateDuplication(struct Individual *i, int min, int max) {
-    int genes = RandomInt(min, max);
-    float *geneX = i->genome + RandomInt(0, i->genes - genes * 2);
-    float *geneY = geneX + genes;
-    while(genes > 0) {
-	*geneY = *geneX;
-        geneX++;
-        geneY++;
-        genes--;
+void PointDeletion(struct Individual *i) {
+    int geneX = RandomRangeInt(0, i->genes - 1);
+    // Delete by writing zero value.
+    i->genome[geneX] = 0.0;
+}
+
+void PointInsertion(struct Individual *i, float minValue, float maxValue) {
+    int geneX = RandomRangeInt(0, i->genes - 1);
+    // Insert by writing new value.
+    i->genome[geneX] = RandomRangeFloat(minValue, maxValue);
+}
+
+void SegmentInversion(struct Individual *i, int minGenes, int maxGenes) {
+    int geneX = RandomRangeInt(0, i->genes - maxGenes);
+    int geneY = geneX + RandomRangeInt(minGenes, maxGenes - 1);
+    while(geneX <= geneY) {
+	// Invert by swapping current values.
+        float swap = i->genome[geneX];
+        i->genome[geneX] = i->genome[geneY];
+        i->genome[geneY] = swap;
+	geneX++;
+	geneY--;
     }
 }
 
-void MutateInsertion(struct Individual *i, int min, int max) {
-    int genes = RandomInt(min, max);
-    float *geneX = i->genome + RandomInt(0, i->genes - genes);
-    float *geneY = i->genome + RandomInt(0, i->genes - genes);
-    while(genes > 0) {
-        *geneY = *geneX;
-        geneX++;
-        geneY++;
-        genes--;
-    }
-}
-
-void MutateTranslocation(struct Individual *i, int min, int max) {
-    int genes = RandomInt(min, max);
-    float *geneX = i->genome + RandomInt(0, i->genes - genes);
-    float *geneY = i->genome + RandomInt(0, i->genes - genes);
-    while(genes > 0) {
-	float swap = *geneY;
-	*geneY = *geneX;
-	geneX = swap;
-        geneX++;
-        geneY++;
-        genes--;
-    }
-}
-
-void MutateInversion(struct Individual *i, int min, int max) {
-    int genes = RandomInt(min, max);
-    float *geneX = i->genome + RandomInt(0, i->genes - genes);
-    float *geneY = geneX + genes - 1;
-    genes /= 2;
-    while(genes > 0) {
-	float swap = *geneY;
-	*geneY = *geneX;
-	geneX = swap;
+void SegmentDeletion(struct Individual *i, int minGenes, int maxGenes) {
+    int geneX = RandomRnageInt(0, i->genes - maxGenes);
+    int geneY = geneX + RandomRangeInt(minGenes, maxGenes - 1);
+    while(geneX <= geneY) {
+	// Delete by writing zero values.
+        i->genome[geneX] = 0.0;
+        i->genome[geneY] = 0.0;
         geneX++;
         geneY--;
-        genes--;
+    }
+}
+
+void SegmentInsertion(struct Individual *i, int minGenes, int maxGenes) {
+    int geneX = RandomRangeInt(0, i->genes - maxGenes);
+    int geneY = geneX + RandomRangeInt(minGenes, maxGenes - 1);
+    int geneZ = RandomRangeInt(0, i->genes - maxGenes);
+    // Iterate geneX to geneY.
+    if(RandomFloat() < 0.5) {
+        while(geneX <= geneY) {
+            // Insert by copying and writing zero value.
+            i->genome[geneZ] = i->genome[geneX];
+            i->genome[geneX] = 0.0;
+	    geneX++;
+	    geneZ++;
+        }
+    // Iterate geneY to geneX (inverted).
+    } else {
+        while(geneX <= geneY) {
+            // Insert by copying and writing zero value.
+            i->genome[geneZ] = i->genome[geneY];
+            i->genome[geneY] = 0.0;
+	    geneY--;
+	    geneZ++;
+        }
+    }
+}
+
+void SegmentDuplication(struct Individual *i int minGenes, int maxGenes) {
+    int geneX = RandomRangeInt(0, i->genes - maxGenes);
+    int geneY = geneX + RandomRangeInt(minGenes, maxGenes - 1);
+    int geneZ = RandomRangeInt(0, i->genes - maxGenes);
+    // Iterate geneX to geneY.
+    if(RandomFloat() < 0.5) {
+        while(geneX <= geneY) {
+            // Duplicate by copying current value.
+            i->genome[geneZ] = i->genome[geneX];
+	    geneX++;
+	    geneZ++;
+        }
+    // Iterate geneY to geneX (inverted).
+    } else {
+        while(geneX <= geneY) {
+            // Duplicate by copying current value.
+            i->genome[geneZ] = i->genome[geneY];
+	    geneY--;
+	    geneZ++;
+        }
+    }
+}
+
+void SegmentTranslocation(struct Individual *i int minGenes, int maxGenes) {
+    int geneX = RandomRangeInt(0, i->genes - maxGenes);
+    int geneY = geneX + RandomRangeInt(minGenes, maxGenes - 1);
+    int geneZ = RandomRangeInt(0, i->genes - maxGenes);
+    // Iterate geneX to geneY.
+    if(RandomFloat() < 0.5) {
+        while(geneX <= geneY) {
+            // Translocate by swapping current values.
+            i->genome[geneZ] = i->genome[geneX];
+	    geneX++;
+	    geneZ++;
+        }
+    // Iterate geneY to geneX (inverted).
+    } else {
+        while(geneX <= geneY) {
+            // Translocate by swapping current values.
+            i->genome[geneZ] = i->genome[geneY];
+	    geneY--;
+	    geneZ++;
+        }
     }
 }

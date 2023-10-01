@@ -7,16 +7,22 @@ struct Individual {
     double fitness;
     int genes;
     float *genome;
-}
+};
 
-void MutatePoint(struct Individual *i, float minimum, float maximum);
+void PointChange(struct Individual *i, float minAmount, float maxAmount);
 
-void MutateDuplication(struct Individual *i, int min, int max);
+void PointDeletion(struct Individual *i);
 
-void MutateInsertion(struct Individual *i, int min, int max);
+void PointInsertion(struct Individual *i, float minValue, float maxValue);
 
-void MutateTranslocation(struct Individual *i, int min, int max);
+void SegmentInversion(struct Individual *i, int minGenes, int maxGenes);
 
-void MutateInversion(struct Individual *i, int min, int max);
+void SegmentDeletion(struct Individual *i, int minGenes, int maxGenes);
+
+void SegmentInsertion(struct Individual *i, int minGenes, int maxGenes);
+
+void SegmentDuplication(struct Individual *i, int minGenes, int maxGenes);
+
+void SegmentTranslocation(struct Individual *i, int minGenes, int maxGenes);
 
 #endif
