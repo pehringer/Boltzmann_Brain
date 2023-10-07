@@ -3,14 +3,14 @@
 
 #include "math.h"
 
-void CrossoverUniform(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
+void CrossoverUniform(float *offspring, float *male, float *female, int genes);
 
-void CrossoverAverage(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
+void CrossoverAverage(float *offspring, float *male, float *female, int genes);
 
-void CrossoverSinglePoint(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
+void CrossoverSinglePoint(float *offspring, float *male, float *female, int genes);
 
-void CrossoverDoublePoint(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
+void CrossoverDoublePoint(float *offspring, float *male, float *female, int genes);
 
-void CrossoverTriplePoint(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
+void CrossoverTriplePoint(float *offspring, float *male, float *female, int genes);
 
 #endif

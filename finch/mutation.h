@@ -3,20 +3,20 @@
 
 #include "math.h"
 
-void MutationPointChange(float *genome, int genes, float minAmount, float maxAmount);
+void MutationPointChange(float *genome, int genes, float min, float max);
 
 void MutationPointDeletion(float *genome, int genes);
 
-void MutationPointInsertion(float *genome, int genes, float minValue, float maxValue);
+void MutationPointInsertion(float *genome, int genes, float min, float max);
 
-void MutationInversion(float *genome, int genes, int minGenes, int maxGenes);
+void MutationInversion(float *genome, int genes, int min, int max);
 
-void MutationDeletion(float *genome, int genes, int minGenes, int maxGenes);
+void MutationDeletion(float *genome, int genes, int min, int max);
 
-void MutationInsertion(float *genome, int genes, int minGenes, int maxGenes);
+void MutationInsertion(float *genome, int genes, int min, int max);
 
-void MutationDuplication(float *genome, int genes, int minGenes, int maxGenes);
+void MutationDuplication(float *genome, int genes, int min, int max);
 
-void MutationTranslocation(float *genome, int genes, int minGenes, int maxGenes);
+void MutationTranslocation(float *genome, int genes, int min, int max);
 
 #endif

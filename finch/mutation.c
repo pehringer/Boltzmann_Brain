@@ -1,58 +1,58 @@
 #include "mutation.h"
 
 // VERIFIED
-void MutationPointChange(float *genome, int genes, float minAmount, float maxAmount) {
+void MutationPointChange(float *offspring, int genes, float min, float max) {
     int geneX = RandomRangeInt(0, genes - 1);
     // Change by adjusting current value.
-    genome[geneX] += RandomRangeFloat(minAmount, maxAmount);
+    offspring[geneX] += RandomRangeFloat(min, max);
 }
 
 // VERIFIED
-void MutationPointDeletion(float *genome, int genes) {
+void MutationPointDeletion(float *offspring, int genes) {
     int geneX = RandomRangeInt(0, genes - 1);
     // Delete by writing zero value.
-    genome[geneX] = 0.0;
+    offspring[geneX] = 0.0;
 }
 
 // VERIFIED
-void MutationPointInsertion(float *genome, int genes, float minValue, float maxValue) {
+void MutationPointInsertion(float *offspring, int genes, float min, float max) {
     int geneX = RandomRangeInt(0, genes - 1);
     // Insert by writing new value.
-    genome[geneX] = RandomRangeFloat(minValue, maxValue);
+    offspring[geneX] = RandomRangeFloat(min, max);
 }
 
 // VERIFIED
-void MutationInversion(float *genome, int genes, int minGenes, int maxGenes) {
-    int range = RandomRangeInt(minGenes, maxGenes);
+void MutationInversion(float *offspring, int genes, int min, int max) {
+    int range = RandomRangeInt(min, max);
     int geneX = RandomRangeInt(0, genes - range);
     int geneY = geneX + range - 1;
     while(geneX <= geneY) {
 	// Invert by swapping current values.
-        float swap = genome[geneX];
-        genome[geneX] = genome[geneY];
-        genome[geneY] = swap;
+        float swap = offspring[geneX];
+        offspring[geneX] = offspring[geneY];
+        offspring[geneY] = swap;
 	geneX++;
 	geneY--;
     }
 }
 
 // VERIFIED
-void MutationDeletion(float *genome, int genes, int minGenes, int maxGenes) {
-    int range = RandomRangeInt(minGenes, maxGenes);
+void MutationDeletion(float *offspring, int genes, int min, int max) {
+    int range = RandomRangeInt(min, max);
     int geneX = RandomRangeInt(0, genes - range);
     int geneY = geneX + range - 1;
     while(geneX <= geneY) {
 	// Delete by writing zero values.
-        genome[geneX] = 0.0;
-        genome[geneY] = 0.0;
+        offspring[geneX] = 0.0;
+        offspring[geneY] = 0.0;
         geneX++;
         geneY--;
     }
 }
 
 // VERIFIED
-void MutationInsertion(float *genome, int genes, int minGenes, int maxGenes) {
-    int range = RandomRangeInt(minGenes, maxGenes);
+void MutationInsertion(float *offspring, int genes, int min, int max) {
+    int range = RandomRangeInt(min, max);
     int geneX = RandomRangeInt(0, genes - range);
     int geneY = geneX + range - 1;
     int geneZ = RandomRangeInt(0, genes - range);
@@ -60,8 +60,8 @@ void MutationInsertion(float *genome, int genes, int minGenes, int maxGenes) {
     if(RandomFloat() < 0.5) {
         while(geneX <= geneY) {
             // Insert by copying and writing zero value.
-            genome[geneZ] = genome[geneX];
-            genome[geneX] = 0.0;
+            offspring[geneZ] = offspring[geneX];
+            offspring[geneX] = 0.0;
 	    geneX++;
 	    geneZ++;
         }
@@ -69,8 +69,8 @@ void MutationInsertion(float *genome, int genes, int minGenes, int maxGenes) {
     } else {
         while(geneX <= geneY) {
             // Insert by copying and writing zero value.
-            genome[geneZ] = genome[geneY];
-            genome[geneY] = 0.0;
+            offspring[geneZ] = offspring[geneY];
+            offspring[geneY] = 0.0;
 	    geneY--;
 	    geneZ++;
         }
@@ -78,8 +78,8 @@ void MutationInsertion(float *genome, int genes, int minGenes, int maxGenes) {
 }
 
 // VERIFIED
-void MutationTranslocation(float *genome, int genes, int minGenes, int maxGenes) {
-    int range = RandomRangeInt(minGenes, maxGenes);
+void MutationTranslocation(float *offspring, int genes, int min, int max) {
+    int range = RandomRangeInt(min, max);
     int geneX = RandomRangeInt(0, genes - range);
     int geneY = geneX + range - 1;
     int geneZ = RandomRangeInt(0, genes - range);
@@ -87,9 +87,9 @@ void MutationTranslocation(float *genome, int genes, int minGenes, int maxGenes)
     if(RandomFloat() < 0.5) {
         while(geneX <= geneY) {
             // Translocate by swapping current values.
-            float swap = genome[geneX];
-            genome[geneX] = genome[geneZ];
-            genome[geneZ] = swap;
+            float swap = offspring[geneX];
+            offspring[geneX] = offspring[geneZ];
+            offspring[geneZ] = swap;
 	    geneX++;
 	    geneZ++;
         }
@@ -97,9 +97,9 @@ void MutationTranslocation(float *genome, int genes, int minGenes, int maxGenes)
     } else {
         while(geneX <= geneY) {
             // Translocate by swapping current values.
-            float swap = genome[geneY];
-            genome[geneY] = genome[geneZ];
-            genome[geneZ] = swap;
+            float swap = offspring[geneY];
+            offspring[geneY] = offspring[geneZ];
+            offspring[geneZ] = swap;
 	    geneY--;
 	    geneZ++;
         }
@@ -107,8 +107,8 @@ void MutationTranslocation(float *genome, int genes, int minGenes, int maxGenes)
 }
 
 // VERIFIED
-void MutationDuplication(float *genome, int genes, int minGenes, int maxGenes) {
-    int range = RandomRangeInt(minGenes, maxGenes);
+void MutationDuplication(float *offspring, int genes, int min, int max) {
+    int range = RandomRangeInt(min, max);
     int geneX = RandomRangeInt(0, genes - range);
     int geneY = geneX + range - 1;
     int geneZ = RandomRangeInt(0, genes - range);
@@ -116,7 +116,7 @@ void MutationDuplication(float *genome, int genes, int minGenes, int maxGenes) {
     if(RandomFloat() < 0.5) {
         while(geneX <= geneY) {
             // Duplicate by copying current value.
-            genome[geneZ] = genome[geneX];
+            offspring[geneZ] = offspring[geneX];
 	    geneX++;
 	    geneZ++;
         }
@@ -124,7 +124,7 @@ void MutationDuplication(float *genome, int genes, int minGenes, int maxGenes) {
     } else {
         while(geneX <= geneY) {
             // Duplicate by copying current value.
-            genome[geneZ] = genome[geneY];
+            offspring[geneZ] = offspring[geneY];
 	    geneY--;
 	    geneZ++;
         }
