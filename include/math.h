@@ -5,12 +5,14 @@
 
 int AbsoluteInt(int value);
 
+int RandomRangeInt(void);
+
+int RandomInt(int min, int max);
+
 float AbsoluteFloat(float value);
 
-int RandomRangeInt(int min, int max);
+float RandomFloat(void);
 
 float RandomRangeFloat(float min, float max);
-
-float RandomFloat(void);
 
 #endif
