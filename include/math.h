@@ -3,16 +3,14 @@
 
 #include <stdlib.h>
 
-int AbsoluteInt(int value);
+int RandInt(int min, int max);
 
-int RandomRangeInt(void);
+float RandFlo(float min, float max);
 
-int RandomInt(int min, int max);
+float* VecMatMul(float *res, const float *vec, const float *mat, int rows, int cols);
 
-float AbsoluteFloat(float value);
+float* VecVecAdd(float *res, const float *vec, int len);
 
-float RandomFloat(void);
-
-float RandomRangeFloat(float min, float max);
+float* VecReLU(float *res, int len);
 
 #endif
