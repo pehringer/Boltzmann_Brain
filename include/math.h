@@ -3,14 +3,61 @@
 
 #include <stdlib.h>
 
+// Math Functions
+
+float Abs(float val);
+
+float ReLU(float val);
+
+// Matrix & Vector Operations
+
+/*
+Parameters:
+res - Vector that holds element for summation.
+len - Length of res.
+Returns:
+Summation of res.
+*/
+float VecSum(float *res, int len);
+
+/*
+Parameters:
+res - Vector that holds element-wise result.
+len - Length of res.
+oper - Operation to be performed on each element of res.
+*/
+void VecElemWise(float *res, int len, float (*oper)(float));
+
+/*
+Parameters:
+res - Vector that holds vector-vector sum.
+vec - Vector to be added to res.
+len - Length of res and vec.
+*/
+void VecVecAdd(float *res, const float *vec, int len);
+
+/*
+Parameters:
+res - Vector that holds vector-vector difference.
+vec - Vector to be subtracted from res.
+len - Length of res and vec.
+*/
+void VecVecSub(float *res, const float *vec, int len);
+
+/*
+Parameters:
+res - Vector that holds matrix-vector product.
+vec - Vector to be multiplied.
+mat - Matrix to be multiplied.
+rows - Rows of mat / length of res.
+cols - Columns of mat / length of vec.
+*/
+void MatVecMul(float *res, const float *mat, const float *vec, int rows, int cols);
+
+// Miscellaneous
+
 int RandInt(int min, int max);
 
 float RandFlo(float min, float max);
-
-float* VecMatMul(float *res, const float *vec, const float *mat, int rows, int cols);
-
-float* VecVecAdd(float *res, const float *vec, int len);
-
-float* VecReLU(float *res, int len);
 
 #endif

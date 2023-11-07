@@ -1,6 +1,5 @@
 #include "network.h"
 
-
 NetConfig InitNetConfig(int layers, int *sizes) {
     NetConfig nc;
     nc.layers = layers;
