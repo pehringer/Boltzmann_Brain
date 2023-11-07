@@ -1,17 +1,11 @@
 #include "math.h"
 
 float Abs(float val) {
-    if(val < 0.0) {
-        val *= -1.0;
-    }
-    return val;
+    return val < 0.0 ? val * -1.0 : val;
 }
 
 float ReLU(float val) {
-    if(val < 0.0) {
-        val = 0.0;
-    }
-    return val;
+    return val < 0.0 ? 0.0 : val;
 }
 
 float VecSum(float *res, int len) {

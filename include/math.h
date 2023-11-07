@@ -5,8 +5,20 @@
 
 // Math Functions
 
+/*
+Parameters:
+val - Value.
+Returns:
+Absolute value of val.
+*/
 float Abs(float val);
 
+/*
+Parameters:
+val - Value.
+Returns:
+Rectified linear unit of val.
+*/
 float ReLU(float val);
 
 // Matrix & Vector Operations
@@ -56,8 +68,22 @@ void MatVecMul(float *res, const float *mat, const float *vec, int rows, int col
 
 // Miscellaneous
 
+/*
+Parameters:
+min - Minimum value to be randomly generated.
+max - Maximum value to be randomly generated.
+Returns:
+Randomly generated value between min and max (inclusive).
+*/
 int RandInt(int min, int max);
 
+/*
+Parameters:
+min - Minimum value to be randomly generated.
+max - Maximum value to be randomly generated.
+Returns:
+Randomly generated value between min and max (inclusive).
+*/
 float RandFlo(float min, float max);
 
 #endif
