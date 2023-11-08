@@ -11,7 +11,7 @@ val - Value.
 Returns:
 Absolute value of val.
 */
-float Abs(float val);
+float Abs(float value);
 
 /*
 Parameters:
@@ -19,52 +19,52 @@ val - Value.
 Returns:
 Rectified linear unit of val.
 */
-float ReLU(float val);
+float ReLU(float value);
 
 // Matrix & Vector Operations
 
 /*
 Parameters:
-res - Vector that holds element for summation.
-len - Length of res.
+result - Vector that holds element for summation.
+length - Length of result.
 Returns:
-Summation of res.
+Summation of result.
 */
-float VecSum(float *res, int len);
+float VecSum(float *result, int length);
 
 /*
 Parameters:
-res - Vector that holds element-wise result.
-len - Length of res.
-oper - Operation to be performed on each element of res.
+result - Vector that holds element-wise result.
+length - Length of result.
+operation - Operation to be performed on each element of result.
 */
-void VecElemWise(float *res, int len, float (*oper)(float));
+void VecElemWise(float *result, int length, float (*operation)(float));
+/*
+Parameters:
+result - Vector that holds vector-vector sum.
+vector - Vector to be added to result.
+length - Length of result and vector.
+*/
+void VecVecAdd(float *result, const float *vector, int length);
 
 /*
 Parameters:
-res - Vector that holds vector-vector sum.
-vec - Vector to be added to res.
-len - Length of res and vec.
+result - Vector that holds vector-vector difference.
+vector - Vector to be subtracted from result.
+length - Length of result and vector.
 */
-void VecVecAdd(float *res, const float *vec, int len);
+void VecVecSub(float *result, const float *vector, int length);
 
 /*
 Parameters:
-res - Vector that holds vector-vector difference.
-vec - Vector to be subtracted from res.
-len - Length of res and vec.
+result - Vector that holds matrix-vector product.
+vector - Vector to be multiplied.
+matrix - Matrix to be multiplied.
+rows - Rows of matrix / length of result.
+columns - Columns of matrix / length of vector.
 */
-void VecVecSub(float *res, const float *vec, int len);
+void MatVecMul(float *result, const float *matrix, const float *vector, int rows, int columns);
 
-/*
-Parameters:
-res - Vector that holds matrix-vector product.
-vec - Vector to be multiplied.
-mat - Matrix to be multiplied.
-rows - Rows of mat / length of res.
-cols - Columns of mat / length of vec.
-*/
-void MatVecMul(float *res, const float *mat, const float *vec, int rows, int cols);
 
 // Miscellaneous
 

@@ -1,44 +1,44 @@
 #include "math.h"
 
-float Abs(float val) {
-    return val < 0.0 ? val * -1.0 : val;
+float Abs(float value) {
+    return value < 0.0 ? value * -1.0 : value;
 }
 
-float ReLU(float val) {
-    return val < 0.0 ? 0.0 : val;
+float ReLU(float value) {
+    return value < 0.0 ? 0.0 : value;
 }
 
-float VecSum(float *res, int len) {
+float VecSum(float *result, int length) {
     float sum = 0.0;
-    for(int n = 0; n < len; n++) {
-        sum += res[n];
+    for(int n = 0; n < length; n++) {
+        sum += result[n];
     }
     return sum;
 }
 
-void VecElemWise(float *res, int len, float (*oper)(float)) {
-    for(int n = 0; n < len; n++) {
-        res[n] = oper(res[n]);
+void VecElemWise(float *result, int length, float (*operation)(float)) {
+    for(int n = 0; n < length; n++) {
+        result[n] = operation(result[n]);
     }
 }
 
-void VecVecAdd(float *res, const float *vec, int len) {
-    for(int n = 0; n < len; n++) {
-        res[n] += vec[n];
+void VecVecAdd(float *result, const float *vector, int length) {
+    for(int n = 0; n < length; n++) {
+        result[n] += vector[n];
     }
 }
 
-void VecVecSub(float *res, const float *vec, int len) {
-    for(int n = 0; n < len; n++) {
-        res[n] -= vec[n];
+void VecVecSub(float *result, const float *vector, int length) {
+    for(int n = 0; n < length; n++) {
+        result[n] -= vector[n];
     }
 }
 
-void MatVecMul(float *res, const float *mat, const float *vec, int rows, int cols) {
+void MatVecMul(float *result, const float *matrix, const float *vector, int rows, int columns) {
     for(int m = 0; m < rows; m++) {
-        res[m] = 0.0;
-        for(int n = 0; n < cols; n++) {
-            res[m] += mat[m * cols + n] * vec[n];
+        result[m] = 0.0;
+        for(int n = 0; n < columns; n++) {
+            result[m] += matrix[m * columns + n] * vector[n];
         }
     }
 }

@@ -14,7 +14,7 @@ void main(void) {
     float res[3] = {
         0.0, 1.1, -2.2,
     };
-    ElemWise(res, 3, ReLU);
+    VecElemWise(res, 3, ReLU);
     for(int i = 0; i < 3; i++) {
         printf("%f, ", res[i]);
     }
