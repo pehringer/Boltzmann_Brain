@@ -3,87 +3,62 @@
 
 #include <stdlib.h>
 
-// Math Functions
+/*
+Parameters:
+  - rows, number of rows in mat.
+  - cols, number of cols in mat.
+  - mat, matrix to perform summation on.
+Returns the summation of mat elements.
+*/
+float MatSum(int rows, int cols, const float *mat);
 
 /*
 Parameters:
-val - Value.
-Returns:
-Absolute value of val.
+  - rows, number of rows in mat and res.
+  - cols, number of cols in mat ans res.
+  - mat, matrix to perform element wise absolute value.
+  - res, matrix to store element wise results.
 */
-float Abs(float value);
+void MatAbs(int rows, int cols, const float *mat, float *res);
 
 /*
 Parameters:
-val - Value.
-Returns:
-Rectified linear unit of val.
+  - rows, number of rows in mat and res.
+  - cols, number of cols in mat and res.
+  - mat, matrix to perform element wise rectified linear unit.
+  - res, matrix to store element wise results.
 */
-float ReLU(float value);
+void MatRLU(int rows, int cols, const float *mat, float *res);
 
-// Matrix & Vector Operations
 
 /*
 Parameters:
-result - Vector that holds element for summation.
-length - Length of result.
-Returns:
-Summation of result.
+  - rows, number of rows in matA, matB, and res.
+  - cols, number of cols in matA, matB, and res.
+  - matA, matrix to perform element wise addition.
+  - matB, matrix to perform element wise addition.
+  - res, matrix to store element wise results.
 */
-float VecSum(float *result, int length);
+void MatAdd(int rows, int cols, const float *matA, const float *matB, float *res);
 
 /*
 Parameters:
-result - Vector that holds element-wise result.
-length - Length of result.
-operation - Operation to be performed on each element of result.
+  - rows, number of rows in matA, matB, and res.
+  - cols, number of cols in matA, matB, and res.
+  - matA, matrix to perform element wise subtraction.
+  - matB, matrix to perform element wise subtraction.
+  - res, matrix to store element wise results.
 */
-void VecElemWise(float *result, int length, float (*operation)(float));
-/*
-Parameters:
-result - Vector that holds vector-vector sum.
-vector - Vector to be added to result.
-length - Length of result and vector.
-*/
-void VecVecAdd(float *result, const float *vector, int length);
+void MatSub(int rows, int cols, const float *matA, const float *matB, float *res);
 
 /*
 Parameters:
-result - Vector that holds vector-vector difference.
-vector - Vector to be subtracted from result.
-length - Length of result and vector.
+  - rows, number of rows in mat, length of res.
+  - cols, number of cols in mat, length of vec./
+  - mat, matrix to perform matrix-vector multiplication.
+  - vec, vector to perform matrix vector multiplication.
+  - res, vector to store results.
 */
-void VecVecSub(float *result, const float *vector, int length);
-
-/*
-Parameters:
-result - Vector that holds matrix-vector product.
-vector - Vector to be multiplied.
-matrix - Matrix to be multiplied.
-rows - Rows of matrix / length of result.
-columns - Columns of matrix / length of vector.
-*/
-void MatVecMul(float *result, const float *matrix, const float *vector, int rows, int columns);
-
-
-// Miscellaneous
-
-/*
-Parameters:
-min - Minimum value to be randomly generated.
-max - Maximum value to be randomly generated.
-Returns:
-Randomly generated value between min and max (inclusive).
-*/
-int RandInt(int min, int max);
-
-/*
-Parameters:
-min - Minimum value to be randomly generated.
-max - Maximum value to be randomly generated.
-Returns:
-Randomly generated value between min and max (inclusive).
-*/
-float RandFlo(float min, float max);
+void MatMul(int rows, int cols, const float *mat, const float *vec, float *res);
 
 #endif

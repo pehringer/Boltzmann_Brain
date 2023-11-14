@@ -1,48 +1,5 @@
 #include "math.h"
 
-float Abs(float value) {
-    return value < 0.0 ? value * -1.0 : value;
-}
-
-float ReLU(float value) {
-    return value < 0.0 ? 0.0 : value;
-}
-
-float VecSum(float *result, int length) {
-    float sum = 0.0;
-    for(int n = 0; n < length; n++) {
-        sum += result[n];
-    }
-    return sum;
-}
-
-void VecElemWise(float *result, int length, float (*operation)(float)) {
-    for(int n = 0; n < length; n++) {
-        result[n] = operation(result[n]);
-    }
-}
-
-void VecVecAdd(float *result, const float *vector, int length) {
-    for(int n = 0; n < length; n++) {
-        result[n] += vector[n];
-    }
-}
-
-void VecVecSub(float *result, const float *vector, int length) {
-    for(int n = 0; n < length; n++) {
-        result[n] -= vector[n];
-    }
-}
-
-void MatVecMul(float *result, const float *matrix, const float *vector, int rows, int columns) {
-    for(int m = 0; m < rows; m++) {
-        result[m] = 0.0;
-        for(int n = 0; n < columns; n++) {
-            result[m] += matrix[m * columns + n] * vector[n];
-        }
-    }
-}
-
 int RandInt(int min, int max) {
     return rand() % (max - min + 1) + min;
 }
@@ -50,3 +7,52 @@ int RandInt(int min, int max) {
 float RandFlo(float min, float max) {
     return (double) rand() / (double) RAND_MAX * (max - min) + min;
 }
+
+float MatSum(int rows, int cols, const float *mat) {
+    int sum = 0.0;
+    for(int i = 0; i < rows * cols; i++) {
+        sum += mat[i];
+    }
+    return sum;
+}
+
+void MatAbs(int rows, int cols, const float *mat, float *res) {
+    for(int i = 0; i < rows * cols; i++) {
+        res[i] = mat[i];
+        if(res[i] < 0.0) {
+            res[i] *= -1;
+        }
+    }
+}
+
+void MatRLU(int rows, int cols, const float *mat, float *res) {
+    for(int i = 0; i < rows * cols; i++) {
+        res[i] = mat[i];
+        if(res[i] < 0.0) {
+            res[i] = 0.0;
+        }
+    }
+}
+
+void MatAdd(int rows, int cols, const float *matA, const float *matB, float *res) {
+    for(int i = 0; i < rows * cols; i++) {
+        res[i] = matA[i] + matB[i];
+    }
+}
+
+void MatSub(int rows, int cols, const float *matA, const float *matB, float *res) {
+    for(int i = 0; i < rows * cols; i++) {
+        res[i] = matA[i] - matB[i];
+    }
+}
+
+void MatMul(int rows, int cols,  const float *mat, const float *vec, float *res) {
+    for(int i = 0; i < rows; i++) {
+        res[i] = 0.0;
+        for(int j = 0; j < cols; j++) {
+            res[i] += mat[j] * vec[j];
+        }
+        mat += cols;
+    }
+}
+

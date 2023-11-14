@@ -3,20 +3,29 @@
 #include "math.h"
 
 void main(void) {
-    float mat[12] = {
-        0.0, 1.1, 2.2, 3.3,
-        4.4, 5.5, 6.6, 7.7,
-        8.8, 9.9, 10.10, 11.11,
+    float matA[6] = {
+        0.0, -1.1, 2.2,
+        3.3, 4.4, 5.5,
     };
-    float vec[4] = {
-        12.12, 13.13, 14.14, -15.15,
+    float matB[6] = {
+        6.6, -7.7, 8.8,
+        -9.9, 10.10, -11.11,
     };
-    float res[3] = {
-        0.0, 1.1, -2.2,
+    float vec[3] = {
+        12.12, 13.13, 14.14,
     };
-    VecElemWise(res, 3, ReLU);
-    for(int i = 0; i < 3; i++) {
-        printf("%f, ", res[i]);
+    float resMat[6] = {
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+    };
+    float resVec[2] = {
+        0.0, 0.0,
+    };
+    MatMul(2, 3, matB, vec, resVec);
+    printf("Op: ");
+    for(int i = 0; i < 2; i++) {
+        printf("%f, ", resVec[i]);
     }
     printf("\n");
+
 }
