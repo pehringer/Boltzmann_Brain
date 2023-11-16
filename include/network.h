@@ -10,7 +10,7 @@ struct Net{
     int   pars; // Length of par.
     int   inps; // Lenght of inp.
     int   outs; // length of out.
-    int   *wid; // Network layer widths (nuerons per layer).
+    int   *wid; // Network layer widths (neurons per layer).
     float *par; // Network parameters (weights/biases).
     float *inp; // Network layer inputs (intermediate calculations).
     float *out; // Network layer outputs (intermediate calculations).
