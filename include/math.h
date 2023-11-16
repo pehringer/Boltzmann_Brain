@@ -5,6 +5,22 @@
 
 /*
 Parameters:
+  - min, minimum value to be randomly generated.
+  - max, maximum value to be randomly generated.
+Returns randomly generated value between min and max (inclusive).
+*/
+int RanInt(int min, int max);
+
+/*
+Parameters:
+  - min, minimum value to be randomly generated.
+  - max, maximum value to be randomly generated.
+Returns randomly generated value between min and max (inclusive).
+*/
+float RanFlo(float min, float max);
+
+/*
+Parameters:
   - rows, number of rows in mat.
   - cols, number of cols in mat.
   - mat, matrix to perform summation on.
