@@ -51,7 +51,7 @@ const float* ForPro(struct Net net, const float *inp);
 /*
 Parameters:
   - net, network to calculate output error.
-  - inp, inputs for forward propagation.
+  - exp, expected outsputs for last forward propagation.
 Returns sum of the absolute difference of the networks last forward
   propagation outputs.
 */
