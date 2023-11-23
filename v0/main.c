@@ -62,157 +62,200 @@ void MatrixMultiplication(int rows, int columns, const float *matrix, const floa
     }
 }
 
-/* MUTATE OPERATIONS */
-
-void MutateAdjustment(int genes, float *genome, float min, float max) {
-    int point = RandomInt(0, genes - 1);
-    genome[point] += RandomFloat(min, max);
-}
-
-void MutateInversion(int genes, float *genome, int min, int max) {
-    int range = RandomInt(min, max);
-    int start = RandomInt(0, genes - range);
-    int stop = start + range - 1;
-    while(start <= stop) {
-        float temp = genome[start];
-        genome[start] = genome[stop];
-        genome[stop] = temp;
-	start++;
-	stop--;
-    }
-}
-
-void MutateSubstitution(int genes, float *genome, int min, int max) {
-    int range = RandomInt(min, max);
-    int start = RandomInt(0, genes - range);
-    int stop = start + range - 1;
-    int swap = RandomInt(0, genes - range);
-    while(start <= stop) {
-        float temp = genome[start];
-        genome[start] = genome[swap];
-        genome[swap] = temp;
-        start++;
-        swap++;
-    }
-}
-
-void MutateRotation(int genes, float * genome , int min, int max) {
-    int range = RandomInt(min, max);
-    int rotate = RandomInt(0, range);
-    int start = RandomInt(0, genes - range);
-    int stop = start + range - 1;
-    printf("range: %d  rotate: %d  start: %d  stop: %d\n", range, rotate, start, stop);
-    while(rotate > 0) {
-        int swap = start;
-        int gene = genome[stop];
-        while(swap <= stop) {
-            int temp = genome[swap];
-            genome[swap] = gene;
-            gene = temp;
-            swap++;
-        }
-        rotate--;
-    }
-}
-
-/* CROSSOVER OPERATIONS
-
-void CrossoverUniform(int genes, const float *genome1, const float *genome2, float *result);
-
-void CrossoverAverage(int genes, const float *genome1, const float *genome2, float *result);
-
-void CrossoverPoint(float *offspringGenome, float *maleGenome, float *femaleGenome, int genes);
-
-*/
-
-/* NETWORK CODE
+/* NETWORK CODE */
 
 struct Network{
     int   depth;
     int   length;
-    int   *width;
-    float *parameter;
-    float *input;
-    float *output;
+    int   *widths;
+    float *parameters;
+    float *inputs;
+    float *outputs;
 };
 
-struct Network NetworkAllocate(int depth, const int *width) {
+struct Network NetworkAllocate(int depth, const int *widths) {
     struct Network n;
     n.depth = depth;
     n.length = 0;
-    int max = width[0];
+    int max = widths[0];
     for(int i = 1; i < depth; i++) {
-        if(width[i] > max) {
-            max = width[i];
+        if(widths[i] > max) {
+            max = widths[i];
         }
-	n.length += width[i] * width[i-1] + width[i];
+	n.length += widths[i] * widths[i - 1] + widths[i];
     }
-    n.width = malloc(sizeof(int) * depth + sizeof(float) * (n.length + max + max));
-    memcpy(n.width, width, sizeof(int) * depth);
-    n.parameter = n.width + depth;
-    n.inpput = n.parameter + n.length;
-    n.output = n.input + max;
+    n.widths = malloc(sizeof(int) * depth + sizeof(float) * (n.length + max + max));
+    memcpy(n.widths, widths, sizeof(int) * depth);
+    n.parameters = (float*) (n.widths + depth);
+    for(int i = 0; i < n.length; i++) {
+        n.parameters[i] = RandomFloat(-1.0, 1.0);
+    }
+    n.inputs = n.parameters + n.length;
+    n.outputs = n.inputs + max;
     return n;
 }
 
 void NetworkDeallocate(struct Network n) {
-    free(n.wid);
+    free(n.widths);
 }
 
-void NetworkInitialize(struct Network n, float min, float max) {
-    for(int i = 0; i < n.length; i++) {
-        n.parameter[i] = RandomFloat(min, max);
-    }
-}
-
-const float* NetworkPropagation(struct Network n, const float *input) {
-    memcpy(n.output, input, sizeof(float) * n.width[0]);
-    float *parameter = n.parameter;
+const float* NetworkPropagation(struct Network n, const float *inputs) {
+    memcpy(n.outputs, inputs, sizeof(float) * n.widths[0]);
+    float *parameters = n.parameters;
     for(int i = 1; i < n.depth; i++) {
-        MatrixMultiplication(n.width[i], n.width[i-1], parameter, n.output, n.input);
-        parameter += n.width[i] * n.width[i-1];
-        MatrixAddition(1, n.width[i], parameter, n.input, n.output);
-        parameter += n.width[i];
-        MatrixReLU(1, n.width[i], n.output, n.output);
+        MatrixMultiplication(n.widths[i], n.widths[i-1], parameters, n.outputs, n.inputs);
+        parameters += n.widths[i] * n.widths[i-1];
+        MatrixAddition(1, n.widths[i], parameters, n.inputs, n.outputs);
+        parameters += n.widths[i];
+        MatrixReLU(1, n.widths[i], n.outputs, n.outputs);
     }
-    return n.output
+    return n.outputs;
 }
 
 float NetworkError(struct Network n, const float *expected) {
-    MatrixSubtraction(1, n.width[n.depth-1], expected, n.output, n.input);
-    MatrixAbsolute(1, n.width[n.depth-1], n.input, n.input);
-    return MatrixSummation(1, n.width[n.depth-1], n.input);
+    MatrixSubtraction(1, n.widths[n.depth - 1], expected, n.outputs, n.inputs);
+    MatrixAbsolute(1, n.widths[n.depth - 1], n.inputs, n.inputs);
+    return MatrixSummation(1, n.widths[n.depth - 1], n.inputs);
 }
 
-*/
+/* Tests Code */
+
+struct Tests {
+    int pairs;
+    const float *inputs;
+    const float *outputs;
+};
+
+/* Individual Code */
+
+struct Individual {
+    float fitness;
+    struct Network n;
+};
+
+int IndividualCompare(const void *l, const void *r) {
+    float result = ((struct Individual*) l)->fitness - ((struct Individual*) r)->fitness;
+    if(result < 0.0) {
+        return -1;
+    }
+    if(result > 0.0) {
+        return 1;
+    }
+    return 0.0;
+}
+
+struct Individual IndividualAllocate(int depth, const int *widths) {
+    struct Individual i;
+    i.fitness = 0.0;
+    i.n = NetworkAllocate(depth, widths);
+    return i;
+}
+
+void IndividualDeallocate(struct Individual i) {
+    NetworkDeallocate(i.n);
+}
+
+float IndividualFitness(struct Individual i, struct Tests t) {
+    i.fitness = 0.0;
+    for(int p = 0; p < t.pairs; p++) {
+        NetworkPropagation(i.n, t.inputs);
+        t.inputs += i.n.widths[0];
+        i.fitness += NetworkError(i.n, t.outputs);
+        t.outputs += i.n.widths[i.n.depth - 1];
+    }
+    return i.fitness /= t.pairs;
+}
+
+void IndividualMutation(struct Individual i, float min, float max) {
+    int gene = RandomInt(0, i.n.length);
+    i.n.parameters[gene] = RandomFloat(min, max);
+}
+
+void IndividualCrossover(struct Individual i1, struct Individual i2, struct Individual result) {
+    for(int p = 0; p < result.n.length; p++) {
+        if(RandomInt(0, 1)) {
+            result.n.parameters[p] = i1.n.parameters[p];
+        } else {
+            result.n.parameters[p] = i2.n.parameters[p];
+        }
+    }
+}
+
+/* Population Code */
+
+struct Population {
+    int size;
+    struct Individual *is;
+};
+
+struct Population PopulationAllocate(int size, int depth, const int *widths) {
+    struct Population p;
+    p.size = size;
+    p.is = malloc(sizeof(struct Individual) * size);
+    for(int i = 0; i < size; i++) {
+        p.is[i] = IndividualAllocate(depth, widths);
+    }
+    return p;
+}
+
+void PopulationDeallocate(struct Population p) {
+    for(int i = 0; i < p.size; i++) {
+        IndividualDeallocate(p.is[i]);
+    }
+    free(p.is);
+}
+
+void PopulationFitness(struct Population p, struct Tests t) {
+    for(int i = 0; i < p.size; i++) {
+        p.is[i].fitness = IndividualFitness(p.is[i], t);
+    }
+}
+
+void PopulationSelection(struct Population p) {
+    qsort(p.is, p.size, sizeof(struct Individual), IndividualCompare);
+}
+
+void PopulationCrossover(struct Population p) {
+    for(int i = p.size / 2; i < p.size; i++) {
+        int i1 = RandomInt(0, p.size / 2);
+        int i2 = RandomInt(0, p.size / 2);
+        IndividualCrossover(p.is[i1], p.is[i2], p.is[i]);
+    }
+}
+
+void PopulationMutation(struct Population p, float min, float max) {
+    for(int i = p.size / 2; i < p.size; i++) {
+        IndividualMutation(p.is[i], min, max);
+    }
+}
+
 
 void main(void) {
-    float m1[6] = {
-        1.00, 1.01, 1.02,
-        1.10, 1.11, 1.12,
-    };
-    float m2[6] = {
-        2.00, 2.01, 2.02,
-        2.10, 2.11, 2.12,
-    };
-    float m3[6] = {
-        3.00, 3.01, 3.02,
-        3.10, 3.11, 3.12,
-    };
-    /*
-    float g[10] = {
-        0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9,
-    };
-    */
+    int gen = 256;
+    int PopSiz = 256;
+    float MutMin = -0.5;
+    float MutMax = 0.5;
 
-    for(int i = 0; i < 128; i++) {
-        float g[10] = {
-            0.0, 1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9,
-        };
-        MutateRotation(10, g, 10, 10);
-        for(int j = 0; j < 10; j++) {
-            printf("%f,", g[j]);
-        }
-        printf("\n\n");
+    int NetDep = 3;
+    int NetWid[3] = {2, 2, 1};
+
+    float Inp[8] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+    float OrOut[4] = {0.0, 1.0, 1.0, 1.0};
+    float NorOut[4] = {1.0, 0.0, 0.0, 0.0};
+    float XorOut[4] = {0.0, 1.0, 1.0, 0.0};
+    float AndOut[4] = {0.0, 0.0, 0.0, 1.0};
+
+    //struct Network n = NetworkAllocate(NetDep, NetWid);
+    //NetworkDeallocate(n);
+
+    struct Tests t = (struct Tests) {4, Inp, XorOut};
+    struct Population p = PopulationAllocate(PopSiz, NetDep, NetWid);
+    for(int i = 0; i < gen; i++) {
+        PopulationFitness(p, t);
+	PopulationSelection(p);
+        PopulationCrossover(p);
+        PopulationMutation(p, MutMin, MutMax);
+        printf("Gen: %d, Err: %f\n", i, p.is[0].fitness);
     }
+    PopulationDeallocate(p);
 }
