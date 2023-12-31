@@ -1,7 +1,16 @@
 import random
 import math
 
-def initalize_parameter(L: int, N: list) -> tuple[dict, dict]:
+def ffnn_functions(fn: str) -> tuple[any, any]:
+	f = lambda z : z
+	fd = lambda z : z
+	match fn.lower():
+		case "tanh":
+			f = lambda z : math.tanh(z)
+			fd = lambda z : 1 - math.tanh(z) ** 2
+	return f, fd
+
+def ffnn_initalize(L: int, N: list) -> tuple[dict, dict]:
 	b = {}
 	w = {}
 	for l in range(1, L):
@@ -11,7 +20,7 @@ def initalize_parameter(L: int, N: list) -> tuple[dict, dict]:
 				w[(l,i,j)] = random.random()
 	return b, w
 
-def forward_propagate(b: dict, f: any, L: int, N: list, w: dict, x: list) -> tuple[dict, list, dict]:
+def ffnn_forward_propagate(b: dict, f: any, L: int, N: list, w: dict, x: list) -> tuple[dict, list, dict]:
 	a = {}
 	z = {}
 	for i in range(0, N[0]):
@@ -25,7 +34,7 @@ def forward_propagate(b: dict, f: any, L: int, N: list, w: dict, x: list) -> tup
 		y[i] = a[(L-1,i)]
 	return a, y, z
 
-def backward_propagate(a: dict, fd: any, L: int, N: list, yt: list, w: dict, z: dict) -> tuple[dict, dict]:
+def ffnn_backward_propagate(a: dict, fd: any, L: int, N: list, yt: list, w: dict, z: dict) -> tuple[dict, dict]:
 	d = {}
 	for i in range(0, N[L-1]):
 		d[(L-1,i)] = fd(z[(L-1,i)]) * (a[(L-1,i)] - yt[i])
@@ -41,7 +50,7 @@ def backward_propagate(a: dict, fd: any, L: int, N: list, yt: list, w: dict, z: 
 				dw[(l,i,j)] = a[(l-1,i)] * d[(l,j)]
 	return db, dw
 
-def gradient_descent(b: dict, db: dict, L: int, N: list, n: float, w: dict, dw: dict) -> tuple[dict, dict]:
+def ffnn_gradient_descent(b: dict, db: dict, L: int, N: list, n: float, w: dict, dw: dict) -> tuple[dict, dict]:
 	for l in range(1, L):
 		for j in range(0, N[l]):
 			b[(l,j)] = b[(l,j)] - n * db[(l,j)]
@@ -49,30 +58,57 @@ def gradient_descent(b: dict, db: dict, L: int, N: list, n: float, w: dict, dw: 
 				w[(l,i,j)] = w[(l,i,j)] - n * dw[(l,i,j)]
 	return b, w
 
-def stochastic_gradient_descent(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
-	b, w = initalize_parameter(L, N)
+def ffnn_save(b: dict, fn: str, L: int, N: list, w: dict):
+	f = open("ffnn.txt", "w")
+	f.write("fn" + " " + fn + "\n")
+	f.write("L" + " " + str(L) + "\n")
+	for n in N:
+		f.write("N" + " " + str(n) + "\n")
+	for k, v in b.items():
+		l, i = k
+		f.write("b" + " " + str(l) + " " + str(i) + " " + str(v) + "\n")
+	for k, v in w.items():
+		l, i, j = k
+		f.write("w" + " " + str(l) + " " + str(i) + " " + str(j) + " " + str(v) + "\n")
+	f.close()
+
+def ffnn_load() -> tuple[dict, str, int, list, dict]:
+	b = {}
+	fn = ""
+	L = 0
+	N = []
+	w = {}
+	f = open("ffnn.txt", "r")
+	for l in f.readlines():
+		t = l.split()
+		match t[0]:
+			case "b":
+				b[(int(t[1]), int(t[2]))] = float(t[3])
+			case "fn":
+				fn = str(t[1])
+			case "L":
+				L = int(t[1])
+			case "N":
+				N += [int(t[1])]
+			case "w":
+				w[(int(t[1]), int(t[2]), int(t[3]))] = float(t[4])
+	f.close()
+	return b, fn, L, N, w
+
+def ffnn_basic_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
+	b, w = ffnn_initalize(L, N)
 	for _ in range(e):
 		for x, yt in t:
-			a, _, z = forward_propagate(b, f, L, N, w, x)
-			db, dw, = backward_propagate(a, fd, L, N, yt, w, z)
-			b, w = gradient_descent(b, db, L, N, n, w, dw)
+			a, _, z = ffnn_forward_propagate(b, f, L, N, w, x)
+			db, dw, = ffnn_backward_propagate(a, fd, L, N, yt, w, z)
+			b, w = ffnn_gradient_descent(b, db, L, N, n, w, dw)
 	return b, w
 
-def print_prediction(b: dict, f: any, L: int, N: list, w: dict, x: list) -> None:
-	_, y, _ = forward_propagate(b, f, L, N, w, x)
+def ffnn_predict(b: dict, f: any, L: int, N: list, w: dict, x: list) -> None:
+	_, y, _ = ffnn_forward_propagate(b, f, L, N, w, x)
 	print(y)
 
-def tanh(z: float) -> float:
-	return math.tanh(z)
-
-def tanh_d(z: float) -> float:
-	return 1 - tanh(z) ** 2
-
 if __name__ == "__main__":
-	f = tanh
-	fd = tanh_d
-	L = 4
-	N = [3, 8, 4, 2]
 	t = [
 		([0, 0, 0], [0, 0]),
 		([0, 0, 1], [0, 1]),
@@ -84,7 +120,25 @@ if __name__ == "__main__":
 		([1, 1, 1], [1, 1])
 	]
 
-	b, w = stochastic_gradient_descent(512, tanh, tanh_d, L, N, 0.15, t)
 
+	'''print("TRAIN")
+
+
+	fn = "TanH"
+	f, fd = ffnn_functions(fn)
+	L = 4
+	N = [3, 8, 4, 2]
+	b, w = ffnn_basic_train(512, f, fd, L, N, 0.15, t)
 	for x, _ in t:
-		print_prediction(b, f, L, N, w, x)
+		ffnn_predict(b, f, L, N, w, x)
+
+
+	print("SAVE/LOAD")
+
+
+	ffnn_save(b, fn, L, N, w)'''
+	b, fn, L, N, w = ffnn_load()
+	f, fd = ffnn_functions(fn)
+	for x, _ in t:
+		ffnn_predict(b, f, L, N, w, x)
+
