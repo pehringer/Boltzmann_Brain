@@ -77,17 +77,41 @@ def ffnn_gradient_descent(b: dict, db: dict, L: int, N: list, n: float, w: dict,
 
 
 
+def print_training_network() -> int:
+        print("Training Network")
+        return 1, 0.0
+def print_epoch_error(i: int, ee: float) -> int:
+        print("\u001b[1F\u001b[2KEpoch:", str(i), "Error:", str(ee))
+        return i + 1, 0.0
+def print_network_trained() -> None:
+        print("\u001b[1F\u001b[2KNetwork Trained")
+def ffnn_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
+	b, w = ffnn_initalize(L, N)
+	i, ee = print_training_network()
+	for _ in range(e):
+		for x, yt in t:
+			a, _, z = ffnn_forward_propagate(b, f, L, N, w, x)
+			db, dw, = ffnn_backward_propagate(a, fd, L, N, yt, w, z)
+			b, w = ffnn_gradient_descent(b, db, L, N, n, w, dw)
+			ee += sum([abs(yt[i] - a[(L-1,i)]) for i in range(N[L-1])])
+		i, ee = print_epoch_error(i, ee)
+	print_network_trained()
+	return b, w
+
+
+
+
 def print_saving_network() -> int:
 	print("Saving Network")
 	return 1
 def print_parameters_saved(i: int) -> int:
-	print("\u001b[1F\u001b[2KParameters Saved: " + str(i))
+	print("\u001b[1F\u001b[2KParameters Saved:", str(i))
 	return i + 1
 def print_network_saved() -> None:
 	print("\u001b[1F\u001b[2KNetwork Saved")
 def ffnn_save(b: dict, fn: str, L: int, N: list, w: dict):
 	i = print_saving_network()
-	f = open("ffnn.txt", "w")
+	f = open("parameters.txt", "w")
 	f.write("fn" + " " + fn + "\n")
 	f.write("L" + " " + str(L) + "\n")
 	for n in N:
@@ -110,7 +134,7 @@ def print_loading_network() -> int:
 	print("Loading Network")
 	return 1
 def print_parameters_loaded(i: int) -> int:
-	print("\u001b[1F\u001b[2KParameters Loaded: " + str(i))
+	print("\u001b[1F\u001b[2KParameters Loaded:", str(i))
 	return i + 1
 def print_network_loaded() -> None:
 	print("\u001b[1F\u001b[2KNetwork Loaded")
@@ -143,69 +167,26 @@ def ffnn_load() -> tuple[dict, str, int, list, dict]:
 
 
 
-def print_rgb(x: float) -> None:
-	v = abs(x)
-	if v > 1.0:
-		x = 1.0
-	v = int(255 * v)
-	if x > 0.0:
-		print("\u001b[48;2;0;" + str(v) + ";0m", end="")
-	if x < 0.0:
-		print("\u001b[48;2;" + str(v) + ";0;0m", end="")
-	print(" \u001b[0m", end="")
 
-def print_training(L: int) -> None:
-	print("Training Network:")
-	for _ in range((L-1)*2+1):
-		print()
-def print_training_example(b: dict, L: int, N: list, w: dict) -> None:
-	print("\u001b[" + str((L-1)*2) + "F\u001b[0J", end="")
-	for l in range(1, L):
-		for i in range(N[l]):
-			print_rgb(b[(l,i)])
-		print()
-		for j in range(N[l]):
-			for i in range(N[l-1]):
-				print_rgb(w[(l,i,j)])
-		print()
-def print_training_epoch(en: int, ee: float, L: int) -> None:
-	print("\u001b[" + str((L-1)*2+1) + "F\u001b[0JEpoch: " + str(en) + " Error: " + str(ee))
-	for _ in range((L-1)*2):
-		print()
-def ffnn_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
-	b, w = ffnn_initalize(L, N)
-	print_training(L)
-	for en in range(e):
-		ee = 0.0
-		for x, yt in t:
-			a, _, z = ffnn_forward_propagate(b, f, L, N, w, x)
-			db, dw, = ffnn_backward_propagate(a, fd, L, N, yt, w, z)
-			b, w = ffnn_gradient_descent(b, db, L, N, n, w, dw)
-			print_training_example(b, L, N, w)
-			ee += sum([abs(yt[i] - a[(L-1,i)]) for i in range(N[L-1])])
-			time.sleep(0.005)
-		print_training_epoch(en, ee, L)
-	print("\u001b[" + str((L-1)*2+2) + "F\u001b[0JNetwork Trained\n\t Error: " + str(ee))
-	return b, w
-
-
+def mnist_load(filepath: str) -> list[tuple]:
+	t = []
+	f = open(filepath, "r")
+	for l in f.readlines()[1:]:
+		l = l.split(",")
+		yt = ([0.0] * 10)
+		yt[int(l[0])] = 1.0
+		x = [float(v) for v in l[1:]]
+		t.append((x, yt))
+	f.close()
+	return t
 
 
 if __name__ == "__main__":
-	t = [
-		([0, 0, 0], [0, 0]),
-		([0, 0, 1], [0, 1]),
-		([0, 1, 0], [0, 1]),
-		([0, 1, 1], [1, 0]),
-		([1, 0, 0], [0, 1]),
-		([1, 0, 1], [1, 0]),
-		([1, 1, 0], [1, 0]),
-		([1, 1, 1], [1, 1])
-	]
+	t = mnist_load("mnist_test.csv")[:100]
 	fn = "TanH"
 	f, fd = ffnn_functions(fn)
 	L = 4
-	N = [3, 8, 4, 2]
-	b, w = ffnn_train(1024, f, fd, L, N, 0.1, t)
+	N = [len(t[0][0]), 16, 16, len(t[0][1])]
+	b, w = ffnn_train(128, f, fd, L, N, 0.05, t)
 	ffnn_save(b, fn, L, N, w)
 
