@@ -85,7 +85,7 @@ def print_epoch_error(i: int, ee: float) -> int:
         return i + 1, 0.0
 def print_network_trained() -> None:
         print("\u001b[1F\u001b[2KNetwork Trained")
-def ffnn_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
+def ffnn_online_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
 	b, w = ffnn_initalize(L, N)
 	i, ee = print_training_network()
 	for _ in range(e):
@@ -95,6 +95,28 @@ def ffnn_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> t
 			b, w = ffnn_gradient_descent(b, db, L, N, n, w, dw)
 			ee += sum([abs(yt[i] - a[(L-1,i)]) for i in range(N[L-1])])
 		i, ee = print_epoch_error(i, ee)
+	print_network_trained()
+	return b, w
+
+
+
+
+def ffnn_batch_train(e: int, f: any, fd: any, L: int, N: list, n: float, t: list) -> tuple[dict, dict]:
+	b, w = ffnn_initalize(L, N)
+	i, eee = print_training_network()
+	for e in range(e):
+		ddb = {key: 0.0 for key in b.keys()}
+		ddw = {key: 0.0 for key in w.keys()}
+		for x, yt in t:
+			a, _, z = ffnn_forward_propagate(b, f, L, N, w, x)
+			db, dw, = ffnn_backward_propagate(a, fd, L, N, yt, w, z)
+			for key in ddb.keys():
+				ddb[key] += db[key]
+			for key in ddw.keys():
+				ddw[key] += dw[key]
+			eee += sum([abs(yt[i] - a[(L-1,i)]) for i in range(N[L-1])])
+		b, w = ffnn_gradient_descent(b, ddb, L, N, n, w, ddw)
+		i, eee = print_epoch_error(i, eee)
 	print_network_trained()
 	return b, w
 
@@ -181,12 +203,15 @@ def mnist_load(filepath: str) -> list[tuple]:
 	return t
 
 
+
+
 if __name__ == "__main__":
-	t = mnist_load("mnist_test.csv")[:100]
+	t = mnist_load("mnist_train.csv")
 	fn = "TanH"
 	f, fd = ffnn_functions(fn)
 	L = 4
 	N = [len(t[0][0]), 16, 16, len(t[0][1])]
-	b, w = ffnn_train(128, f, fd, L, N, 0.05, t)
+	#b, w = ffnn_train(128, f, fd, L, N, 0.05, t)
+	b, w = ffnn_batch_train(128, f, fd, L, N, 0.000002, t)
 	ffnn_save(b, fn, L, N, w)
 
