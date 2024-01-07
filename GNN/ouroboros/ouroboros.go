@@ -3,62 +3,85 @@ package main
 import "fmt"
 import "math/rand"
 
-type Pair struct {
-	i	int;
-	j	int;
+// Network
+type Net struct {
+	// Input Weights
+	//                                TH           TH
+	// iw   = iw[i][j] = weight from i   input to j   neuron.
+	//   ij
+	iw	[][]float32
+
+	// Neuron Parameters
+	//                                TH            TH
+	// np   = np[i][j] = weight from i   neuron to j   neuron.
+	//   ij
+	//                            TH
+	// np   = np[k][k] = bias of k   neuron.
+	//   kk
+	np	[][]float32
 }
 
-type Network struct {
-	input	[]int
-	hidden	[]int
-	output	[]int
-	bias	map[int]float32
-	weight	map[Pair]float32
-}
-
-func Rand_float32() float32 {
+func RandomFloat() float32 {
 	return rand.Float32() * 2.0 - 1.0
 }
 
-func New_Network(input_count, hidden_count, output_count int) Network {
-	n := Network{
-		make([]int, input_count),
-		make([]int, hidden_count),
-		make([]int, output_count),
-		make(map[int]float32),
-		make(map[Pair]float32),
+func NewNet(I, H, O int) (n Network) {
+	n.I = [I]int
+	n.H = [H]int
+	n.O = [O]int
+	v := 0
+	for i := 0; i < I; i++ {
+		n.I[i] = v
+		v++
 	}
-	vertex_count := 0
-	for i := 0; i < input_count; i++ {
-		n.input[i] = vertex_count
-		vertex_count++
+	for i := 0; i < H; i++ {
+		n.H[i] = v
+		v++
 	}
-	for i := 0; i < hidden_count; i++ {
-		n.hidden[i] = vertex_count
-		vertex_count++
+	for i := 0; i < O; i++ {
+		n.O[i] = v
+		v++
 	}
-	for i := 0; i < input_count; i++ {
-		n.output[i] = vertex_count
-		vertex_count++
-	}
-	for j := range n.hidden {
-		n.bias[j] = Rand_float32()
-		for i := range n.input {
-			n.weight[Pair{i, j}] = Rand_float32()
+	n.b = map[int]float32
+	n.w = map[Pair]float32
+	for j := range n.H {
+		n.b[j] = RandFloat32()
+		for i := range n.I {
+			n.w[Pair{i, j}] = RandFloat32()
 		}
-		for i := range n.hidden {
+		for i := range n.H {
 			if i != j {
-				n.weight[Pair{i, j}] = Rand_float32()
+				n.w[Pair{i, j}] = RandFloat32()
 			}
 		}
 	}
-	for j := range n.output {
-		n.bias[j] = Rand_float32()
-		for i := range n.hidden {
-			n.weight[Pair{i, j}] = Rand_float32()
+	for j := range n.O {
+		n.b[j] = RandFloat32()
+		for i := range n.H {
+			n.w[Pair{i, j}] = RandFloat32()
 		}
 	}
 	return n
+}
+
+func (n Network) Run(x []float32, c int) (y []float32) {
+	a := map[int]float32
+	for i := range n.H {
+		a[i] = 0.0
+	}
+	for k := 0; k < c; k++ {
+		for j := range n.H {
+			a[j] = n.b[j]
+			for i := range n.I {
+				a[j] += a[i] * n.w[Pair{i, j}]
+			}
+			for i := range n.hidden {
+				if i != j {
+					a[j] += a[i] * n.w[Pair{i, j}]
+				}
+			}
+		}
+	}
 }
 
 func main() {
