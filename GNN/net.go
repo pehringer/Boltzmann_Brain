@@ -33,13 +33,61 @@ order is determined by the ordering of the neurons
                 \_____/                                     \_____/
 */
 
-type ParamPair struct {
-	Meta	int64
-	Param	float64
+package main
+
+import "fmt"
+
+type ParameterPair struct {
+	metadata	int64
+	data		float64
 }
 
-func (*p Pair) 
+func BiasPair(neuron int64, value float64) ParameterPair {
+	if neuron <= 0 {
+		panic("neuron cannot be less than 1")
+	}
+	return ParameterPair{-neuron, value}
+}
 
+func WeightPair(neuron int64, value float64) ParameterPair {
+	if neuron <= 0 {
+		panic("neuron cannot be less than 1")
+	}
+	return ParameterPair{neuron, value}
+}
 
+func (p ParameterPair)IsBias() bool {
+	return p.metadata < 0
+}
 
+func (p ParameterPair) IsWeight() bool {
+	return p.metadata > 0
+}
 
+func (p ParameterPair) GetNeuron() int64 {
+	if p.metadata < 0 {
+		return -p.metadata
+	}
+	return p.metadata
+}
+
+func (p ParameterPair) GetValue() float64 {
+	return p.data
+}
+
+func main() {
+	ppl := []ParameterPair{
+		BiasPair(3, 1.25),
+		WeightPair(1, 1.5),
+		WeightPair(2, -0.75),
+		BiasPair(4, -0.25),
+		WeightPair(3, 0.5),
+	}
+	for _, pp := range ppl {
+		if pp.IsBias() {
+			fmt.Println(pp.GetNeuron(), ":", pp.GetValue())
+		} else if pp.IsWeight() {
+			fmt.Println("\t", pp.GetNeuron(), "->", pp.GetValue())
+		}
+	}
+}
