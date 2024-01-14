@@ -26,19 +26,19 @@ A network can be encoded as a list of parameters:
   Activations                      |  Parameters
   __[1]___[2]___[3]___[4]___[5]__  |  _____________
                                    |
-  [ 0.0 , 0.0 , 0.0 , 0.0 , 0.0 ]  |                   Set first N activations to N inputs [ A.A, A.A].
+  [ A.A , A.A , 0.0 , 0.0 , 0.0 ]  |                   Set first N activations to N inputs [ A.A, A.A].
                                    |
                                    |                    _____________
-  [ A.A , A.A , 0.0 , 0.0 , 0.0 ]  |  (  2 ,  0.9 )    2   0.9  | 0.5\__   A series of weights followed
+  [ A.A , A.A , B.B , 0.0 , 0.0 ]  |  (  2 ,  0.9 )    2   0.9  | 0.5\__   A series of weights followed
                                    |  (  1 , -2.7 )     ________|____/  3  by a bias describes a neuron.
                                    |  ( -3 ,  0.5 )    1  -2.7
                                    |
                                    |                             ____
-  [ A.A , A.A , B.B , 0.0 , 0.0 ]  |  (  3 ,  1.5 )     ________|-0.3\__   A series of weights followed
+  [ A.A , A.A , B.B , 0.0 , C.C ]  |  (  3 ,  1.5 )     ________|-0.3\__   A series of weights followed
                                    |  ( -5 , -0.3 )    3   1.5  |____/  5  by a bias describes a neuron.
                                    |
                                    |                    _____________
-  [ A.A , A.A , B.B , 0.0 , C.C ]  |  (  1 ,  1.1 )    1   1.1  | 0.8\__   A series of weights followed
+  [ A.A , A.A , B.B , D.D , C.C ]  |  (  1 ,  1.1 )    1   1.1  | 0.8\__   A series of weights followed
                                    |  (  2 , -0.3 )     ________|____/  4  by a bias describes a neuron.
                                    |  ( -4 ,  0.8 )    2  -0.3
                                    |
