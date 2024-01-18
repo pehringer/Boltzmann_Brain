@@ -94,6 +94,7 @@ def gnn_select(p: list) -> tuple[float, dict, dict]:
 
 
 
+def gnn_path()
 def gnn_train(b: dict, f: any, L: int, N: list, t: list, w: dict) -> tuple[dict, dict]:
 	bm = {}
 	wm = {}
@@ -120,12 +121,31 @@ def gnn_train(b: dict, f: any, L: int, N: list, t: list, w: dict) -> tuple[dict,
 
 L = 3
 N = [2, 2, 1]
-t = [
+t_and = [
 	([0.0, 0.0], [0.0]),
 	([0.0, 1.0], [0.0]),
 	([1.0, 0.0], [0.0]),
 	([1.0, 1.0], [1.0]),
 ]
+t_nand = [
+	([0.0, 0.0], [1.0]),
+	([0.0, 1.0], [0.0]),
+	([1.0, 0.0], [0.0]),
+	([1.0, 1.0], [0.0]),
+]
+t_or = [
+	([0.0, 0.0], [0.0]),
+	([0.0, 1.0], [1.0]),
+	([1.0, 0.0], [1.0]),
+	([1.0, 1.0], [1.0]),
+]
+t_xor = [
+	([0.0, 0.0], [0.0]),
+	([0.0, 1.0], [1.0]),
+	([1.0, 0.0], [1.0]),
+	([1.0, 1.0], [0.0]),
+]
+t = t_xor
 f = gnn_functions("Tanh")
 b, w = gnn_initalize(L, N)
 for e in range(128):
