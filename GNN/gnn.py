@@ -191,8 +191,8 @@ t_xor = [
 ]
 
 f = ffnn_function("relu")
-L = 4
-N = [3, 8, 4, 2]
+L = 5
+N = [3, 16, 8, 4, 2]
 
 t_full_adder = [
 ([0.0, 0.0, 0.0], [0.0, 0.0]),
@@ -211,16 +211,31 @@ t_full_adder = [
 
 t = t_full_adder
 b, w = ffnn_initalize(L, N)
-for c in range(1024):
+for c in range(64):
+	bo, wo = gnn_pathway(b, L, N, 1, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
+	bo, wo = gnn_pathway(b, L, N, 2, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
+	bo, wo = gnn_pathway(b, L, N, 3, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
 	bo, wo = gnn_pathway(b, L, N, 4, w)
 	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
-	bo, wo = gnn_feature(b, L, N, 4, w)
+	bo, wo = gnn_pathway(b, L, N, 5, w)
 	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
-	print("CYCLE:", c, "\t", "ERROR:", e)
-	if c % 32 == 0 and e > 4:
-		b, w = gnn_noise(b, w, 0.8)
-	if c % 64 == 0 and e > 2:
+	bo, wo = gnn_pathway(b, L, N, 6, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
+	print("CYCLE:", c, "ERROR:", e)
+	if e > 8:
+		b, w = gnn_noise(b, w, 0.06)
+	elif e > 7:
 		b, w = gnn_noise(b, w, 0.05)
-
-	if e < 1:
-		break
+	elif e > 6:
+		b, w = gnn_noise(b, w, 0.04)
+	elif e > 5:
+		b, w = gnn_noise(b, w, 0.03)
+	elif e > 4:
+		b, w = gnn_noise(b, w, 0.02)
+	elif e > 3:
+		b, w = gnn_noise(b, w, 0.01)
+	elif e > 2:
+		b, w = gnn_noise(b, w, 0.005)
