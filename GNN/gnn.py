@@ -1,21 +1,20 @@
 import random
 import math
-import time
 
+'''________________________________
+   Feed Forward Neural Network Code
+   --------------------------------'''
 
-
-
-def gnn_functions(fn: str) -> any:
+def ffnn_function(fn: str) -> any:
 	f = lambda z : z
 	match fn.lower():
 		case "tanh":
 			f = lambda z : math.tanh(z)
+		case "relu":
+			f = lambda z : max(0.0, z)
 	return f
 
-
-
-
-def gnn_initalize(L: int, N: list) -> tuple[dict, dict]:
+def ffnn_initalize(L: int, N: list) -> tuple[dict, dict]:
 	b = {}
 	w = {}
 	for l in range(1, L):
@@ -25,23 +24,20 @@ def gnn_initalize(L: int, N: list) -> tuple[dict, dict]:
 				w[(l,i,j)] = random.uniform(-1.0, 1.0)
 	return b, w
 
-
-
-
-def gnn_forward_propagate(b: dict, bm: dict, f: any, L: int, N: list, w: dict, wm: dict, x: list) -> list:
+def ffnn_propagate(b: dict, bo: dict, f: any, L: int, N: list, w: dict, wo: dict, x: list) -> list:
 	a = {}
 	z = {}
 	for i in range(0, N[0]):
 		a[(0,i)] = x[i]
 	for l in range(1, L):
 		for j in range(0, N[l]):
-			if (l,j) in bm:
-				z[(l,j)] = bm[(l,j)]
+			if (l,j) in bo:
+				z[(l,j)] = bo[(l,j)]
 			else:
 				z[(l,j)] = b[(l,j)]
 			for i in range(0, N[l-1]):
-				if (l,i,j) in wm:
-					z[(l,j)] += wm[(l,i,j)] * a[(l-1,i)]
+				if (l,i,j) in wo:
+					z[(l,j)] += wo[(l,i,j)] * a[(l-1,i)]
 				else:
 					z[(l,j)] += w[(l,i,j)] * a[(l-1,i)]
 			a[(l,j)] = f(z[(l,j)])
@@ -50,106 +46,181 @@ def gnn_forward_propagate(b: dict, bm: dict, f: any, L: int, N: list, w: dict, w
 		y[i] = a[(L-1,i)]
 	return y
 
+'''_______________________
+   Genectic Algorithm Code
+   -----------------------'''
 
+def gnn_feature(b: dict, L: int, N: list, P: int, w: dict) -> tuple[dict, dict]:
+	fb = {}
+	fw = {}
+	# Select neuron and copy bias.
+	l = random.randrange(1, L)
+	j = random.randrange(0, N[l])
+	if P > 0:
+		fb[(l,j)] = b[(l,j)]
+	# Compute weight range.
+	s = 0
+	e = N[l-1]
+	if e - P + 1 > 0:
+		s = random.randint(0, e - P + 1)
+		e = s + P - 1
+	# Copy  weights.
+	while s < e:
+		i = s
+		fw[(l,s,j)] = w[(l,i,j)]
+		s += 1
+	return fb, fw
 
+def gnn_pathway(b: dict, L: int, N: list, P: int, w: dict) -> tuple[dict, dict]:
+	pb = {}
+	pw = {}
+	# Compute layer range.
+	s = 2
+	e = L * 2
+	if e - P > 2:
+		s = random.randint(2, e - P)
+		e = s + P
+	# Select starting point.
+	l = s // 2
+	i = random.randrange(0, N[l-1])
+	# Select and copy parameters.
+	while s < e:
+		l = s // 2
+		j = random.randrange(0, N[l])
+		if s % 2 == 0 and s < e:
+			pw[(l,i,j)] = w[(l,i,j)]
+			s += 1
+		if s % 2 == 1 and s < e:
+			pb[(l,j)] = b[(l,j)]
+			s += 1
+		i = j
+	return pb, pw
 
-def gnn_mutate(bm: dict, s: int, wm: dict) -> list:
-	p = [(0.0, bm, wm)]
+def gnn_mutate(bo: dict, s: int, wo: dict) -> list:
+	p = [(0.0, bo, wo)]
 	for i in range(s):
-		bmi = {}
-		for k, v in bm.items():
-			if(random.random() < 0.5):
+		boi = {}
+		for k, v in bo.items():
+			if random.random() < 0.5:
 				v += random.uniform(-0.2, 0.2)
-			bmi[k] = v
-		wmi = {}
-		for k, v in wm.items():
-			if(random.random() < 0.5):
+			boi[k] = v
+		woi = {}
+		for k, v in wo.items():
+			if random.random() < 0.5:
 				v += random.uniform(-0.2, 0.2)
-			wmi[k] = v
-		p.append((0.0, bmi, wmi))
+			woi[k] = v
+		p.append((0.0, boi, woi))
 	return p
-
-
-
 
 def gnn_fitness(b: dict, f: any, L: int, N: list, p: list, t: list, w: dict) -> list:
 	for k in range(len(p)):
-		_, bm, wm = p[k]
+		_, bo, wo = p[k]
 		e = 0.0
 		for x, yt in t:
-			y = gnn_forward_propagate(b, bm, f, L, N, w, wm, x)
+			y = ffnn_propagate(b, bo, f, L, N, w, wo, x)
 			for i, j in zip(yt, y):
 				e += abs(i - j)
-		p[k] = (e, bm, wm)
+		p[k] = (e, bo, wo)
 	return p
-
-
-
 
 def gnn_select(p: list) -> tuple[float, dict, dict]:
 	p.sort(key=lambda a: a[0])
-	e, bm, wm = p[0]
-	return e, bm, wm
+	e, bo, wo = p[0]
+	return e, bo, wo
 
 
-
-
-def gnn_path()
-def gnn_train(b: dict, f: any, L: int, N: list, t: list, w: dict) -> tuple[dict, dict]:
-	bm = {}
-	wm = {}
-	i = random.randrange(0, N[0])
-	for l in range(1, L):
-		j = random.randrange(0, N[l])
-		bm[(l,j)] = b[(l,j)]
-		wm[(l,i,j)] = w[(l,i,j)]
-		i = j
-	s = (len(bm) + len(wm)) * 5
+def gnn_train(b: dict, bo: dict, f: any, L: int, N: list, t: list, w: dict, wo: dict) -> tuple[float, dict, dict]:
+	s = (len(bo) + len(wo)) ** 2
 	for i in range(s):
-		p = gnn_mutate(bm, s, wm)
+		p = gnn_mutate(bo, s, wo)
 		p = gnn_fitness(b, f, L, N, p, t, w)
-		e, bm, wm = gnn_select(p)
-	print(e)
-	for k, v in bm.items():
+		e, bo, wo = gnn_select(p)
+	for k, v in bo.items():
 		b[k] = v
-	for k, v in wm.items():
+	for k, v in wo.items():
 		w[k] = v
+	return e, b, w
+
+def gnn_noise(b: dict, w: dict, r: float) -> tuple[dict, dict]:
+	for k in b:
+		if random.random() < r:
+			b[k] = random.uniform(-1.0, 1.0)
+	for k in w:
+		if random.random() < r:
+			w[k] = random.uniform(-1.0, 1.0)
 	return b, w
 
 
-
-
+f = ffnn_function("relu")
 L = 3
 N = [2, 2, 1]
+
 t_and = [
-	([0.0, 0.0], [0.0]),
-	([0.0, 1.0], [0.0]),
-	([1.0, 0.0], [0.0]),
-	([1.0, 1.0], [1.0]),
+([0.0, 0.0], [0.0]),
+([0.0, 1.0], [0.0]),
+([1.0, 0.0], [0.0]),
+([1.0, 1.0], [1.0]),
 ]
+
 t_nand = [
-	([0.0, 0.0], [1.0]),
-	([0.0, 1.0], [0.0]),
-	([1.0, 0.0], [0.0]),
-	([1.0, 1.0], [0.0]),
+([0.0, 0.0], [1.0]),
+([0.0, 1.0], [1.0]),
+([1.0, 0.0], [1.0]),
+([1.0, 1.0], [0.0]),
 ]
+
 t_or = [
-	([0.0, 0.0], [0.0]),
-	([0.0, 1.0], [1.0]),
-	([1.0, 0.0], [1.0]),
-	([1.0, 1.0], [1.0]),
+([0.0, 0.0], [0.0]),
+([0.0, 1.0], [1.0]),
+([1.0, 0.0], [1.0]),
+([1.0, 1.0], [1.0]),
 ]
+
+t_nor = [
+([0.0, 0.0], [1.0]),
+([0.0, 1.0], [0.0]),
+([1.0, 0.0], [0.0]),
+([1.0, 1.0], [0.0]),
+]
+
 t_xor = [
-	([0.0, 0.0], [0.0]),
-	([0.0, 1.0], [1.0]),
-	([1.0, 0.0], [1.0]),
-	([1.0, 1.0], [0.0]),
+([0.0, 0.0], [0.0]),
+([0.0, 1.0], [1.0]),
+([1.0, 0.0], [1.0]),
+([1.0, 1.0], [0.0]),
 ]
-t = t_xor
-f = gnn_functions("Tanh")
-b, w = gnn_initalize(L, N)
-for e in range(128):
-	b, w = gnn_train(b, f, L, N, t, w)
-for x, yt in t:
-	y = gnn_forward_propagate(b, {}, f, L, N, w, {}, x)
-	print(x, y, yt)
+
+f = ffnn_function("relu")
+L = 4
+N = [3, 8, 4, 2]
+
+t_full_adder = [
+([0.0, 0.0, 0.0], [0.0, 0.0]),
+([0.0, 0.0, 1.0], [1.0, 0.0]),
+([0.0, 1.0, 0.0], [1.0, 0.0]),
+([0.0, 1.0, 1.0], [0.0, 1.0]),
+([1.0, 0.0, 0.0], [1.0, 0.0]),
+([1.0, 0.0, 1.0], [0.0, 1.0]),
+([1.0, 1.0, 0.0], [0.0, 1.0]),
+([1.0, 1.0, 1.0], [1.0, 1.0]),
+]
+
+'''_________
+   Glue Code
+   ---------'''
+
+t = t_full_adder
+b, w = ffnn_initalize(L, N)
+for c in range(1024):
+	bo, wo = gnn_pathway(b, L, N, 4, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
+	bo, wo = gnn_feature(b, L, N, 4, w)
+	e, b, w = gnn_train(b, bo, f, L, N, t, w, wo)
+	print("CYCLE:", c, "\t", "ERROR:", e)
+	if c % 32 == 0 and e > 4:
+		b, w = gnn_noise(b, w, 0.8)
+	if c % 64 == 0 and e > 2:
+		b, w = gnn_noise(b, w, 0.05)
+
+	if e < 1:
+		break
