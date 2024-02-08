@@ -1,162 +1,111 @@
+'''
+  INPUT    OUTPUT
+0 [w, w] 0 [b]
+1 [w, w] 1 [w, b]
+2 [w, w] 2 [w, w, b]
+   0  1     0  1  2
+  [x, x]   [y, y, y]
+'''
 import random
-import math
 
-'''________________________________
-   Feed Forward Neural Network Code
-   --------------------------------'''
+def net_new(X: int, Y: int) -> tuple[list, list]:
+	XP = [[random.uniform(-0.1, 0.1) for c in range(X)] for r in range(Y)]
+	YP = [[random.uniform(-0.1, 0.1) for c in range(r+1)] for r in range(Y)]
+	return XP, YP
 
-def ffnn_function(fn: str) -> any:
-	f = lambda z : z
-	match fn.lower():
-		case "tanh":
-			f = lambda z : math.tanh(z)
-		case "relu":
-			f = lambda z : max(0.0, z)
-	return f
-
-def ffnn_initalize(L: int, N: list) -> tuple[dict, dict]:
-	b = {}
-	w = {}
-	for l in range(1, L):
-		for j in range(0, N[l]):
-			b[(l,j)] = random.uniform(-0.1, 0.1)
-			for i in range(0, N[l-1]):
-				w[(l,i,j)] = random.uniform(-0.1, 0.1)
-	return b, w
-
-def ffnn_propagate(b: dict, bo: dict, f: any, L: int, N: list, w: dict, wo: dict, x: list) -> list:
-	a = {}
-	z = {}
-	for i in range(0, N[0]):
-		a[(0,i)] = x[i]
-	for l in range(1, L):
-		for j in range(0, N[l]):
-			if (l,j) in bo:
-				z[(l,j)] = bo[(l,j)]
+def net_run(X: list, XP: list, XPM: dict, YP: list, YPM: dict) -> list:
+	Y = [0.0 for i in range(len(YP))]
+	for i in range(len(YP)):
+		y = 0.0
+		for j in range(len(XP[i])):
+			if (i,j) in XPM:
+				y += X[j] * XPM[(i,j)]
 			else:
-				z[(l,j)] = b[(l,j)]
-			for i in range(0, N[l-1]):
-				if (l,i,j) in wo:
-					z[(l,j)] += wo[(l,i,j)] * a[(l-1,i)]
-				else:
-					z[(l,j)] += w[(l,i,j)] * a[(l-1,i)]
-			a[(l,j)] = f(z[(l,j)])
-	y = [0.0] * N[L-1]
-	for i in range(0, N[L-1]):
-		y[i] = a[(L-1,i)]
-	return y
+				y += X[j] * XP[i][j]
+		for j in range(len(YP[i])-1):
+			if (i,j) in YPM:
+				y += Y[j] * YPM[(i,j)]
+			else:
+				y += Y[j] * YP[i][j]
+		if (i,-1) in YPM:
+			y += YPM[(i,-1)]
+		else:
+			y += YP[i][-1]
+		Y[i] = max(0.0, y)
+	return Y
 
-'''_______________________
-   Genectic Algorithm Code
-   -----------------------'''
-
-def gnn_feature(b: dict, L: int, N: list, w: dict) -> tuple[dict, dict]:
-	fb = {}
-	fw = {}
-	i = random.randrange(0, N[0])
-	for l in range(1, L):
-		j = random.randrange(0, N[l])
-		fw[(l,i,j)] = w[(l,i,j)]
-		fb[(l,j)] = b[(l,j)]
-		i = j
-	return fb, fw
-
-def gnn_mutate(fb: dict, fw: dict, R: float) -> tuple[dict, dict]:
-	mb = {}
-	mw = {}
-	for k, v in fb.items():
-		if random.random() < R:
-			v += random.uniform(-0.1, 0.1)
-		mb[k] = v
-	for k, v in fw.items():
-		if random.random() < R:
-			v += random.uniform(-0.1, 0.1)
-		mw[k] = v
-	return mb, mw
-
-def gnn_batch(b: dict, mb: dict, f: any, L: int, N: list, t: list, w: dict, mw: dict) -> list:
-	et = []
-	for k in range(len(t)):
-		e = 0.0
-		y = ffnn_propagate(b, mb, f, L, N, w, mw, t[k][0])
-		for i, j in zip(t[k][1], y):
-			e += abs(i - j)
-		et.append((e, k))
-	et = sorted(et, key=lambda x: x[0])
-	bt = []
-	for i in range(-8, 0, 1):
-		bt.append(t[et[i][1]])
-	return bt
-
-def gnn_fitness(b: dict, mb: dict, f: any, L: int, N: list, t: list, w: dict, mw: dict) -> float:
+def net_err(T: list, XP: list, XPM: dict, YP: list, YPM: dict) -> float:
 	e = 0.0
-	for x, yt in t:
-		y = ffnn_propagate(b, mb, f, L, N, w, mw, x)
-		for i, j in zip(yt, y):
-			e += abs(i - j)
+	for X, YT in T:
+		Y = net_run(X, XP, XPM, YP, YPM)
+		for y, yt in zip(Y[-len(YT):], YT):
+			e += abs(y - yt)
 	return e
 
-def gnn_merge(b: dict, fb: dict, w: dict, fw: dict) -> tuple[dict, dict]:
-	for k, v in fb.items():
-		b[k] = v
-	for k, v in fw.items():
-		w[k] = v
-	return b, w
+def gnn_feature(XP: list, YP: list) -> tuple[dict, dict]:
+	XPM = {}
+	YPM = {}
 
-def gnn_train(b: dict, f: any, L: int, N: list, t: list, w: dict) -> tuple[float, dict, dict]:
-	bt = gnn_batch(b, {}, f, L, N, t, w, {})
-	for q in range(64):
-		fb, fw = gnn_feature(b, L, N, w)
-		fe = gnn_fitness(b, fb, f, L, N, t, w, fw)
-		for p in range(16):
-			mb, mw = gnn_mutate(fb, fw, 0.2)
-			me = gnn_fitness(b, mb, f, L, N, bt, w, mw)
-			if me < fe:
-				fe = me
-				fb = mb
-				fw = mw
-		b, w = gnn_merge(b, fb, w, fw)
-	return fe, b, w
+	i = random.randrange(0, len(YP))
+	j = random.randrange(0, len(XP[i]))
+	XPM[(i,j)] = XP[i][j]
+	if i > 0:
+		j = random.randrange(0, len(YP[i])-1)
+		YPM[(i,j)] = YP[i][j]
+	YPM[(i,-1)] = YP[i][-1]
 
-'''_____________
-   Training Code
-   -------------'''
+	i = random.randrange(0, len(YP))
+	j = random.randrange(0, len(XP[i]))
+	XPM[(i,j)] = XP[i][j]
+	if i > 0:
+		j = random.randrange(0, len(YP[i])-1)
+		YPM[(i,j)] = YP[i][j]
+	YPM[(i,-1)] = YP[i][-1]
 
-t_not = [
+	return XPM, YPM
+
+def gnn_mutation(XPM: dict, YPM: dict) -> tuple[dict, dict]:
+	XPMM = {}
+	YPMM = {}
+	for ij in XPM:
+		XPMM[ij] = XPM[ij] + random.uniform(-0.1, 0.1)
+	for ij in YPM:
+		YPMM[ij] = YPM[ij] + random.uniform(-0.1, 0.1)
+	return XPMM, YPMM
+
+def gnn_combine(XP: list, XPM: list, YP: list, YPM: list) -> tuple[list, list]:
+	for i, j in XPM:
+		XP[i][j] = XPM[(i,j)]
+	for i, j in YPM:
+		YP[i][j] = YPM[(i,j)]
+	return XP, YP
+
+def net_train(T: list, XP: list, YP: list) -> tuple[float, list, list]:
+	XPM, YPM = gnn_feature(XP, YP)
+	e = net_err(T, XP, XPM, YP, YPM)
+	for i in range(16):
+		XPMM, YPMM = gnn_mutation(XPM, YPM)
+		ee = net_err(T, XP, XPMM, YP, YPMM)
+		if ee <= e:
+			e = ee
+			XPM = XPMM
+			YPM = YPMM
+	XP, YP = gnn_combine(XP, XPM, YP, YPM)
+	return e, XP, YP
+
+T_NOT = [
 ([0.0], [1.0]),
 ([1.0], [0.0]),
 ]
 
-
-t_and = [
-([0.0, 0.0], [0.0]),
-([0.0, 1.0], [0.0]),
-([1.0, 0.0], [0.0]),
-([1.0, 1.0], [1.0]),
-]
-
-t_nand = [
-([0.0, 0.0], [1.0]),
-([0.0, 1.0], [1.0]),
-([1.0, 0.0], [1.0]),
-([1.0, 1.0], [0.0]),
-]
-
-t_or = [
-([0.0, 0.0], [0.0]),
-([0.0, 1.0], [1.0]),
-([1.0, 0.0], [1.0]),
-([1.0, 1.0], [1.0]),
-]
-
-t_nor = [
+T_NOR = [
 ([0.0, 0.0], [1.0]),
 ([0.0, 1.0], [0.0]),
 ([1.0, 0.0], [0.0]),
 ([1.0, 1.0], [0.0]),
 ]
 
-t_xor = [
+T_XOR = [
 ([0.0, 0.0], [0.0]),
 ([0.0, 1.0], [1.0]),
 ([1.0, 0.0], [1.0]),
@@ -173,7 +122,6 @@ t_full_adder = [
 ([1.0, 1.0, 0.0], [0.0, 1.0]),
 ([1.0, 1.0, 1.0], [1.0, 1.0]),
 ]
-
 
 t_2bit_full_adder = [
 ([0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0]),
@@ -210,22 +158,39 @@ t_2bit_full_adder = [
 ([1.0, 1.0, 1.0, 1.0, 1.0], [0.0, 1.0, 1.0]),
 ]
 
+T = t_2bit_full_adder
+XP, YP = net_new(len(T[0][0]), 16)
 
-t = t_2bit_full_adder
-f = ffnn_function("relu")
-L = 6
-N = [5, 24, 24, 24, 24, 3]
+for i in range(4096 * 16):
+	e, XP, YP = net_train(T, XP, YP)
+	print(i, e)
+	if e < 0.7:
+		break
+	if i % 16 == 0 and e > 24.0:
+		XPM, YPM = gnn_feature(XP, YP)
+		XPM, YPM = gnn_mutation(XPM, YPM)
+		XP, YP = gnn_combine(XP, XPM, YP, YPM)
+	elif i % 32 == 0 and e > 12.0:
+		XPM, YPM = gnn_feature(XP, YP)
+		XPM, YPM = gnn_mutation(XPM, YPM)
+		XP, YP = gnn_combine(XP, XPM, YP, YPM)
+	elif i % 64 == 0 and e > 6.0:
+		XPM, YPM = gnn_feature(XP, YP)
+		XPM, YPM = gnn_mutation(XPM, YPM)
+		XP, YP = gnn_combine(XP, XPM, YP, YPM)
+	elif i % 128 == 0 and e > 3.0:
+		XPM, YPM = gnn_feature(XP, YP)
+		XPM, YPM = gnn_mutation(XPM, YPM)
+		XP, YP = gnn_combine(XP, XPM, YP, YPM)
+	elif i % 256 == 0 and e > 1.5:
+		XPM, YPM = gnn_feature(XP, YP)
+		XPM, YPM = gnn_mutation(XPM, YPM)
+		XP, YP = gnn_combine(XP, XPM, YP, YPM)
+for X, YT in T:
+	Y = net_run(X, XP, {}, YP, {})
+	print(X, YT, Y[-len(YT):])
 
-b, w = ffnn_initalize(L, N)
-for c in range(4096):
-	e, b, w = gnn_train(b, f, L, N, t, w)
-	print(c, e)
-	if c % 16 == 0:
-		if gnn_fitness(b, {}, f, L, N, t, w, {}) < 4.0:
-			break
 
-for x, yt in t:
-	y = ffnn_propagate(b, {}, f, L, N, w, {}, x)
-	print(x, yt, y)
+
 
 
